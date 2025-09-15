@@ -155,7 +155,7 @@
 <ul id="matches"></ul>
 
 <script>
-  const scriptURL = 'https://script.google.com/macros/s/AKfycbz8eYzyV-4tXCUYfuXGQUgFEyTQhf9TjhPg7CkqyPdRqgxs4GMzMIhQpv6oISMF93cw/exec'; // <-- Replace
+  const scriptURL = 'https://script.google.com/macros/s/AKfycbyLXGKcZ8v4DS7SE75wCEJb7ycoPRH1H8Ep8Cw_7n69SMhsxfSzj1ReSOOqgrZteUHN/exec';
 
   // Handle form submission
   document.getElementById('travelForm').addEventListener('submit', function(e){
@@ -197,20 +197,18 @@
       return;
     }
 
-    fetch(scriptURL) // calls doGet
+    fetch(`${scriptURL}?destination=${encodeURIComponent(selectedDestination)}`) // calls doGet
       .then(response => response.json())
       .then(data => {
-        const matches = data.filter(s => s.destination === selectedDestination);
-
         const matchesList = document.getElementById('matches');
         matchesList.innerHTML = "";
 
-        if (matches.length === 0) {
+        if (data.length === 0) {
           matchesList.innerHTML = `<li>No students found for ${selectedDestination}</li>`;
         } else {
-          matches.forEach(student => {
+          data.forEach(student => {
             const li = document.createElement('li');
-            li.textContent = `${student.name} (${student.email}) - ${student.destination} ${student.daytrip ? "(" + student.daytrip + ")" : ""}`;
+            li.textContent = `${student.name} (${student.email}) - ${student.destination} ${student.dayTrip ? "(" + student.dayTrip + ")" : ""}`;
             matchesList.appendChild(li);
           });
         }
