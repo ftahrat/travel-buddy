@@ -189,22 +189,24 @@
     document.getElementById('londonTrips').style.display = this.value === 'London' ? 'block' : 'none';
   });
 
-  // Fetch and show students by destination
+
+  // Show students by destination
   document.getElementById('showBtn').addEventListener('click', function() {
     const selectedDestination = document.getElementById('matchDestination').value;
-    if (!selectedDestination) {
-      alert("Please select a destination.");
-      return;
+
+    let url = scriptURL;
+    if (selectedDestination) {
+      url += `?destination=${encodeURIComponent(selectedDestination)}`;
     }
 
-    fetch(`${scriptURL}?destination=${encodeURIComponent(selectedDestination)}`) // calls doGet
+    fetch(url) // <-- now destination is passed
       .then(response => response.json())
       .then(data => {
         const matchesList = document.getElementById('matches');
         matchesList.innerHTML = "";
 
         if (data.length === 0) {
-          matchesList.innerHTML = `<li>No students found for ${selectedDestination}</li>`;
+          matchesList.innerHTML = `<li>No students found${selectedDestination ? ' for ' + selectedDestination : ''}</li>`;
         } else {
           data.forEach(student => {
             const li = document.createElement('li');
