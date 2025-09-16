@@ -56,7 +56,11 @@
       text-align: left;
     }
     #matches li {
-      margin: 8px 0;
+      margin: 12px 0;
+      padding: 10px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
   </style>
 </head>
@@ -116,7 +120,7 @@
 </form>
 
 <div class="match-section">
-  <label for="matchDestination">Select destination to see all students:</label>
+  <label for="matchDestination">Select destination to see groups:</label>
   <select id="matchDestination">
     <option value="">--Select a destination--</option>
     <option>Austria</option>
@@ -149,13 +153,13 @@
     <option>Georgia</option>
     <option>London</option>
   </select>
-  <button id="showBtn">Show Students</button>
+  <button id="showBtn">Show Groups</button>
 </div>
 
 <ul id="matches"></ul>
 
 <script>
-  const scriptURL = 'https://script.google.com/macros/s/AKfycby_Hm8TJ8LF-tOWGLp8q_ZC09sk9DM8BkhGTfMux9QTdZBvLXWxmkZBYSj4oAFiD8xc/exec';
+  const scriptURL = 'https://script.google.com/macros/s/AKfycbyDtNo5Xabl3O_OlFsA7goVl5pSqozFwMBNZoxj_YMuCC1IV5waFIbvgAsPfGPlih9F/exec'; // <-- replace with your deployed web app URL
 
   // Handle form submission
   document.getElementById('travelForm').addEventListener('submit', function(e){
@@ -189,8 +193,7 @@
     document.getElementById('londonTrips').style.display = this.value === 'London' ? 'block' : 'none';
   });
 
-
-  // Show students by destination
+  // Show groups by destination
   document.getElementById('showBtn').addEventListener('click', function() {
     const selectedDestination = document.getElementById('matchDestination').value;
 
@@ -199,25 +202,28 @@
       url += `?destination=${encodeURIComponent(selectedDestination)}`;
     }
 
-    fetch(url) // <-- now destination is passed
+    fetch(url)
       .then(response => response.json())
-      .then(data => {
+      .then(groups => {
         const matchesList = document.getElementById('matches');
         matchesList.innerHTML = "";
 
-        if (data.length === 0) {
-          matchesList.innerHTML = `<li>No students found${selectedDestination ? ' for ' + selectedDestination : ''}</li>`;
+        const groupKeys = Object.keys(groups);
+        if (groupKeys.length === 0) {
+          matchesList.innerHTML = `<li>No groups found${selectedDestination ? ' for ' + selectedDestination : ''}</li>`;
         } else {
-          data.forEach(student => {
+          groupKeys.forEach(groupName => {
+            const group = groups[groupName];
             const li = document.createElement('li');
-            li.textContent = `${student.name} (${student.email}) - ${student.destination} ${student.dayTrip ? "(" + student.dayTrip + ")" : ""}`;
+            li.innerHTML = `<strong>${groupName}</strong> (${group.length} students)<br>` +
+              group.map(s => `${s.name} (${s.email})`).join("<br>");
             matchesList.appendChild(li);
           });
         }
       })
       .catch(error => {
         console.error('Error fetching data:', error);
-        alert("Could not load student list.");
+        alert("Could not load student groups.");
       });
   });
 </script>
