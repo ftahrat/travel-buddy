@@ -11,10 +11,7 @@
       text-align: center;
       padding: 20px;
     }
-    h1 {
-      color: #ff3366;
-      margin-bottom: 20px;
-    }
+    h1 { color: #ff3366; margin-bottom: 20px; }
     form, .match-section {
       background-color: #ffffffcc;
       padding: 25px;
@@ -55,9 +52,7 @@
       border-radius: 10px;
       text-align: left;
     }
-    #matches li {
-      margin: 8px 0;
-    }
+    #matches li { margin: 8px 0; }
     .group-box {
       margin: 15px 0;
       padding: 10px;
@@ -65,10 +60,7 @@
       background: #fefefe;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
-    .group-box h3 {
-      margin: 5px 0;
-      color: #ff3366;
-    }
+    .group-box h3 { margin: 5px 0; color: #ff3366; }
     .group-box a {
       display: inline-block;
       margin-bottom: 8px;
@@ -83,7 +75,15 @@
 
 <form id="travelForm">
   <input type="text" id="name" placeholder="Your Name" required>
-  <input type="email" id="email" placeholder="Your Email" required>
+
+  <label for="consent">Do you want to share your email and join the chat?</label>
+  <select id="consent" required>
+    <option value="">--Select an option--</option>
+    <option value="Yes">Yes</option>
+    <option value="No">No</option>
+  </select>
+
+  <input type="email" id="email" placeholder="Your Email">
 
   <label for="destination">Choose your destination:</label>
   <select id="destination" required>
@@ -139,24 +139,35 @@
 <div id="matches"></div>
 
 <script>
-  const scriptURL = 'https://script.google.com/macros/s/AKfycbzjdUKlcTMy6ooZRvu-g3DxZMo7VtPGrQ2UjGdUjqIhp-txKlYae-ewb_GTq72u20PI/exec';
+  const scriptURL = 'YOUR_DEPLOYED_WEB_APP_URL'; // replace with your Web App URL
+
+  // Show London trips only when London is chosen
+  document.getElementById('destination').addEventListener('change', function() {
+    document.getElementById('londonTrips').style.display = this.value === 'London' ? 'block' : 'none';
+  });
 
   // Handle form submission
   document.getElementById('travelForm').addEventListener('submit', function(e){
     e.preventDefault();
 
     const name = document.getElementById('name').value.trim();
-    const email = document.getElementById('email').value.trim();
+    const consent = document.getElementById('consent').value;
+    let email = document.getElementById('email').value.trim();
     const destination = document.getElementById('destination').value.trim();
     const dayTrip = document.getElementById('londonTrips').value.trim();
 
+    // Blank out email if consent = No
+    if (consent === "No") email = "";
+
     const formData = new FormData();
     formData.append('name', name);
+    formData.append('consent', consent);
     formData.append('email', email);
     formData.append('destination', destination);
     formData.append('dayTrip', dayTrip);
 
     fetch(scriptURL, { method: 'POST', body: formData })
+      .then(res => res.json())
       .then(() => {
         alert("You have joined the travel pool!");
         document.getElementById('travelForm').reset();
@@ -166,11 +177,6 @@
         console.error('Error!', error.message);
         alert("There was an error submitting the form.");
       });
-  });
-
-  // Show London trips only when London is chosen
-  document.getElementById('destination').addEventListener('change', function() {
-    document.getElementById('londonTrips').style.display = this.value === 'London' ? 'block' : 'none';
   });
 
   // Show groups
@@ -206,8 +212,9 @@
 
           const ul = document.createElement('ul');
           group.students.forEach(student => {
+            const emailText = student.email ? ` (${student.email})` : " (Email hidden)";
             const li = document.createElement('li');
-            li.textContent = `${student.name} (${student.email}) ${student.dayTrip ? "- " + student.dayTrip : ""}`;
+            li.textContent = `${student.name}${emailText}${student.dayTrip ? " - " + student.dayTrip : ""}`;
             ul.appendChild(li);
           });
           box.appendChild(ul);
